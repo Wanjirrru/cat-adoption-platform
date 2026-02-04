@@ -1,2 +1,12 @@
-# cat-adoption-platform
-A modern full-stack pet adoption platform with Laravel (API-only) backend and Next.js + TypeScript frontend. Features role-based access control, cat profiles with images, adoption requests, and user management. Dockerized, with CI/CD via GitHub Actions for production-ready DevOps practices.
+# Pet Adoption Platform
+
+A modern full-stack pet adoption system with role-based access.
+
+## Stack
+- Backend: Laravel (API)
+- Frontend: Next.js + TypeScript + Tailwind
+- Database: MySQL
+
+## Local Development 
+- Backend: `cd backend && php artisan serve`
+- Frontend: `cd frontend && npm run dev`
