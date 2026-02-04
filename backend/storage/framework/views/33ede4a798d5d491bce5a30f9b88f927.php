@@ -1,2 +1,0 @@
-<img src="<?php echo e(asset('storage/logo/newlogo.png')); ?>" alt="Cat Adoption System Logo" class="h-24 w-auto">
-<?php /**PATH /home/melissa/DevOps/cat-adoption-platform/backend/resources/views/components/application-logo.blade.php ENDPATH**/ ?>
