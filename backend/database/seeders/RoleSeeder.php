@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -15,35 +15,24 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create or get existing roles
+        // ─── Roles ───
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $adminRole      = Role::firstOrCreate(['name' => 'admin']);
+        $userRole       = Role::firstOrCreate(['name' => 'user']);
 
-        // Define and create permissions
+        // ─── Permissions ───
         $permissions = [
-            // User Management
             'manage users',
             'assign roles',
-
-            // Role & Permission Management
             'manage roles',
             'manage permissions',
-
-            // Cat Management
             'create cats',
             'edit cats',
             'delete cats',
-
-            // Adoption Management
             'view all adoptions',
             'manage adoptions',
-
-            // Payment Management
             'view all payments',
             'refund payments',
-
-            // User-specific Permissions
             'view available cats',
             'request adoption',
             'make payment',
@@ -54,19 +43,21 @@ class RoleSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Assign all permissions to Super Admin
+        // Super admin gets everything
         $superAdminRole->syncPermissions(Permission::all());
 
-        // Assign specific permissions to Admin
+        // Admin gets most admin powers
         $adminRole->syncPermissions([
             'create cats',
             'edit cats',
             'delete cats',
             'view all adoptions',
             'manage adoptions',
+            'manage users',
+            'assign roles',
         ]);
 
-        // Assign specific permissions to User
+        // Normal user gets only client permissions
         $userRole->syncPermissions([
             'view available cats',
             'request adoption',
@@ -74,20 +65,36 @@ class RoleSeeder extends Seeder
             'view my payments',
         ]);
 
-        // Assign roles to specific users (optional)
-        $superAdmin = User::find(1); // Assuming the first user is the super admin
-        if ($superAdmin) {
-            $superAdmin->assignRole('super-admin');
-        }
+        // ─── Create / assign users explicitly (no ID assumptions) ───
 
-        $admin = User::find(2); // Assuming the second user is an admin
-        if ($admin) {
-            $admin->assignRole('admin');
-        }
+        // Super Admin
+        $super = User::firstOrCreate(
+            ['email' => 'super@admin.com'],
+            [
+                'name'     => 'Super Administrator',
+                'password' => Hash::make('password123'),
+            ]
+        );
+        $super->assignRole('super-admin');
 
-        $user = User::find(3); // Assuming the third user is a normal user
-        if ($user) {
-            $user->assignRole('user');
-        }
+        // Admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@catadopt.com'],
+            [
+                'name'     => 'Administrator',
+                'password' => Hash::make('password123'),
+            ]
+        );
+        $admin->assignRole('admin');
+
+        // Regular User
+        $user = User::firstOrCreate(
+            ['email' => 'user@catadopt.com'],
+            [
+                'name'     => 'Regular User',
+                'password' => Hash::make('password123'),
+            ]
+        );
+        $user->assignRole('user');
     }
 }
