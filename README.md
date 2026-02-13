@@ -33,13 +33,13 @@ A full-stack web application for managing cat adoptions, featuring role-based ac
     (The first run may take a few minutes to build the images.)
 
 3.  Run Laravel migrations & seed:
-    # Generate application key (if not already set)
+    ## Generate application key (if not already set)
     docker compose exec backend php artisan key:generate --ansi
 
-    # Run migrations and seed the database (if you have seeders)
+    ## Run migrations and seed the database (if you have seeders)
     docker compose exec backend php artisan migrate --seed
 
-    # Create symbolic link for storage (important for images)
+    ## Create symbolic link for storage (important for images)
     docker compose exec backend php artisan storage:link
 
 4.  Access the app:
@@ -73,3 +73,47 @@ In the Docker environment, the frontend communicates with the backend via the in
 
 If developing the frontend outside Docker, run:
 - cd frontend && npm run dev
+
+## Authentication Modes
+
+The project supports **two authentication modes** so it can adapt to different deployment scenarios and preferences:
+
+Mode
+- Bearer Token (default) : Stateless authentication using JWT-like tokens stored in localStorage. | `NEXT_PUBLIC_STATEFUL_AUTH=false` (default)
+- Cookie-based (stateful) : Uses Laravel Sanctum cookies + sessions. Automatic credential sending. | `NEXT_PUBLIC_STATEFUL_AUTH=true` + Laravel `STATEFUL_AUTH=true`
+
+### 1. Bearer Token Mode (Recommended for most API + SPA setups)
+
+This is the default mode — no extra configuration needed.
+
+**Frontend behavior:**
+- Token stored in `localStorage`
+- Automatically attached via Axios interceptor (`Authorization: Bearer ...`)
+- Works perfectly with different ports/domains via Next.js proxy
+
+**Backend behavior:**
+- Sanctum issues personal access tokens
+- CSRF protection disabled for `/api/*` (safe for token auth)
+
+**When to use:**
+- Frontend & backend on different domains/ports (e.g. Vercel + Laravel Forge)
+- Planning mobile apps or third-party integrations
+- Want stateless, explicit control
+
+### 2. Cookie-based Sanctum Mode (Stateful / Session-like)
+
+Enable this for a more traditional web-app feel (recommended when selling to non-technical buyers or same-domain deployments).
+
+**How to enable:**
+
+1. In **Next.js** `.env.local` (or production env):
+   NEXT_PUBLIC_STATEFUL_AUTH=true
+
+2. In **Laravel** `.env`:
+   STATEFUL_AUTH=true
+   SANCTUM_STATEFUL_DOMAINS=localhost:3000,127.0.0.0.1:3000,yourdomain.com
+   SESSION_DOMAIN=.yourdomain.com #leading dot for subdomains
+
+3. Clear caches:
+   ```bash
+   php artisan optimize:clear
