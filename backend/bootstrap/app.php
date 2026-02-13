@@ -8,9 +8,7 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         api: __DIR__.'/../routes/api.php',
-        web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
-        // health: '/up',
     )
        ->withMiddleware(function (Middleware $middleware) {
 
@@ -25,6 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+                'api/*', // Exclude API routes from CSRF protection
+                'sanctum/csrf-cookie', // Exclude Sanctum CSRF cookie route
+        ]);
+
         /*
         |--------------------------------------------------------------------------
         | Middleware Aliases
@@ -36,7 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        //
+->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->render(function (Illuminate\Auth\AuthenticationException $e, $request) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        });
     })
     ->create();
