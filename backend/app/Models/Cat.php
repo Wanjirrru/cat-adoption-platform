@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cat extends Model
 {
-    protected $fillable = ['name', 'description', 'breed', 'age', 'is_adopted', 'images', 'price'];
+    protected $fillable = ['name', 'description', 'breed', 'gender','age', 'is_adopted', 'images', 'price'];
 
     protected $casts = [
         'images' => 'array'
